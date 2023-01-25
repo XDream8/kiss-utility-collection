@@ -1,0 +1,33 @@
+#!/bin/sh -e
+## search a package and print results with the packages version
+### XDream8
+
+search_pkg() {
+	IFS=:
+
+	for find_path in $KISS_PATH; do
+		set +f
+		for find_pkg in "$find_path/"$1; do
+			test "-d" "$find_pkg" && {
+				read -r repo_ver 2>/dev/null <"$find_pkg/version"
+				repo_ver="${repo_ver%% *}"
+				[ "$repo_ver" ] && repo_ver=":$repo_ver"
+				if [ "$search_result" = "" ]; then
+					search_result="$find_pkg$repo_ver"
+				else
+					search_result="$search_result $find_pkg$repo_ver"
+				fi
+			}
+		done
+	done
+
+	unset IFS
+}
+
+main() {
+	search_pkg "$@"
+
+	printf '%s\n' "$search_result" | tr ' ' '\n'
+}
+
+main "$@"
